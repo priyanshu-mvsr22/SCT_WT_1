@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Navigation Menu</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for hamburger icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Basic Reset & Font */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            color: #333;
+            /* Create enough content to enable scrolling */
+            min-height: 200vh;
+        }
+
+        /* Navigation Bar Styling */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        /* Navbar style when scrolled */
+        .navbar.scrolled {
+            background-color: #4A90E2; /* Blue background */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar.scrolled .logo a,
+        .navbar.scrolled .nav-links a {
+            color: #ffffff; /* White text for scrolled state */
+        }
+
+        .navbar.scrolled .nav-links a::after {
+            background-color: #ffffff; /* White underline for scrolled state */
+        }
+
+        .navbar.scrolled .nav-links a.active {
+            color: #FFD700; /* Gold for active link in scrolled state */
+        }
+
+        .navbar.scrolled .hamburger-menu i {
+            color: #ffffff; /* White hamburger icon */
+        }
+
+        .logo a {
+            color: #333;
+            text-decoration: none;
+            font-size: 1.8rem;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2.5rem; /* Increased gap for better spacing */
+        }
+
+        .nav-links a {
+            color: #555;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: color 0.3s ease;
+            border-radius: 5px; /* Added for subtle rounding if background is added */
+        }
+
+        /* Hover and Active Effects for Nav Links */
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background-color: #4A90E2; /* Blue underline */
+            transition: width 0.3s ease-in-out;
+            border-radius: 2px;
+        }
+
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: #4A90E2; /* Blue on hover */
+        }
+
+        .nav-links a.active {
+            color: #4A90E2; /* Blue for active link */
+            font-weight: 600;
+        }
+
+        /* Hamburger Menu for Mobile */
+        .hamburger-menu {
+            display: none; /* Hidden by default on desktop */
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        /* Overlay for Mobile Menu */
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .nav-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Mobile Menu Styling */
+        .nav-links.mobile-active {
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 70%;
+            max-width: 300px;
+            height: 100%;
+            background-color: #ffffff;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            padding: 3rem 2rem;
+            transform: translateX(100%); /* Start off-screen */
+            transition: transform 0.4s ease-out;
+            gap: 1.5rem;
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .nav-links.mobile-active.open {
+            transform: translateX(0); /* Slide in */
+        }
+
+        .nav-links.mobile-active a {
+            color: #333;
+            font-size: 1.3rem;
+            width: 100%;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .nav-links.mobile-active a:last-child {
+            border-bottom: none;
+        }
+
+        .nav-links.mobile-active a:hover {
+            color: #4A90E2;
+        }
+
+        .nav-links.mobile-active a.active {
+            color: #4A90E2;
+            font-weight: 700;
+        }
+
+        /* Close button for mobile menu */
+        .close-menu {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            color: #333;
+            cursor: pointer;
+            display: none; /* Hidden by default */
+        }
+
+        /* Content Sections for Scrolling */
+        section {
+            min-height: 100vh; /* Each section takes full viewport height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 20px 20px; /* Adjust padding for fixed navbar */
+            text-align: center;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        #home { background-color: #6c757d; }
+        #about { background-color: #5cb85c; }
+        #services { background-color: #f0ad4e; }
+        #portfolio { background-color: #5bc0de; }
+        #contact { background-color: #d9534f; }
+
+        section h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        section p {
+            max-width: 800px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none; /* Hide desktop menu */
+            }
+
+            .hamburger-menu, .close-menu {
+                display: block; /* Show hamburger and close icons */
+            }
+
+            .logo a {
+                font-size: 1.5rem;
+            }
+
+            section {
+                padding: 60px 15px 15px;
+                font-size: 1.2rem;
+            }
+
+            section h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                padding: 0.7rem 1rem;
+            }
+
+            .logo a {
+                font-size: 1.3rem;
+            }
+
+            .hamburger-menu {
+                font-size: 1.5rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+
+            section p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <a href="#home">MyBrand</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home" class="nav-link">Home</a></li>
+            <li><a href="#about" class="nav-link">About</a></li>
+            <li><a href="#services" class="nav-link">Services</a></li>
+            <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
+            <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+        <div class="hamburger-menu" id="hamburgerMenu">
+            <i class="fas fa-bars"></i>
+        </div>
+        <div class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </div>
+    </nav>
+
+    <!-- Mobile menu overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <section id="home">
+        <h2>Welcome to Our Website</h2>
+        <p>Discover innovative solutions tailored for your success. We are dedicated to providing exceptional services.</p>
+    </section>
+    <section id="about">
+        <h2>About Us</h2>
+        <p>We are a team of passionate professionals committed to delivering high-quality results and exceeding client expectations.</p>
+    </section>
+    <section id="services">
+        <h2>Our Services</h2>
+        <p>From web development to digital marketing, we offer a comprehensive suite of services to help your business thrive.</p>
+    </section>
+    <section id="portfolio">
+        <h2>Our Portfolio</h2>
+        <p>Explore our diverse range of projects and see how we've helped businesses achieve their goals with creative and effective solutions.</p>
+    </section>
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <p>Have a question or a project in mind? Reach out to us, and let's create something amazing together.</p>
+    </section>
+
+    <script>
+        const navbar = document.getElementById('navbar');
+        const navLinks = document.getElementById('navLinks');
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const closeMenu = document.getElementById('closeMenu');
+        const navOverlay = document.getElementById('navOverlay');
+        const sections = document.querySelectorAll('section');
+        const navLinkElements = document.querySelectorAll('.nav-link');
+
+        // Function to change navbar style on scroll
+        function changeNavbarStyle() {
+            if (window.scrollY > 50) { // Adjust this value as needed
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        }
+
+        // Function to highlight active section in navigation
+        function highlightActiveNavLink() {
+            let currentActive = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - navbar.offsetHeight; // Adjust for fixed navbar height
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop && pageYOffset < sectionTop + sectionHeight) {
+                    currentActive = section.getAttribute('id');
+                }
+            });
+
+            navLinkElements.forEach(link => {
+                link.classList.remove('active');
+                if (link.href.includes(currentActive)) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Event listener for scroll
+        window.addEventListener('scroll', () => {
+            changeNavbarStyle();
+            highlightActiveNavLink();
+        });
+
+        // Initial call to set navbar style and active link on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            changeNavbarStyle();
+            highlightActiveNavLink();
+        });
+
+        // Toggle mobile menu
+        hamburgerMenu.addEventListener('click', () => {
+            navLinks.classList.add('mobile-active', 'open');
+            navOverlay.classList.add('active');
+        });
+
+        closeMenu.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            // Give a slight delay before removing mobile-active to allow transition
+            setTimeout(() => {
+                navLinks.classList.remove('mobile-active');
+                navOverlay.classList.remove('active');
+            }, 300);
+        });
+
+        // Close mobile menu when clicking outside (on overlay)
+        navOverlay.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            setTimeout(() => {
+                navLinks.classList.remove('mobile-active');
+                navOverlay.classList.remove('active');
+            }, 300);
+        });
+
+        // Close mobile menu when a nav link is clicked
+        navLinkElements.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Prevent default anchor behavior for smooth scrolling
+                e.preventDefault();
+
+                // Get the target section ID from the href
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+
+                if (targetSection) {
+                    // Calculate the offset to account for the fixed navbar
+                    const offsetTop = targetSection.offsetTop - navbar.offsetHeight + 1; // +1 to ensure it's slightly above the top edge
+
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+
+                // Close the mobile menu after clicking a link
+                if (navLinks.classList.contains('mobile-active')) {
+                    navLinks.classList.remove('open');
+                    setTimeout(() => {
+                        navLinks.classList.remove('mobile-active');
+                        navOverlay.classList.remove('active');
+                    }, 300);
+                }
+            });
+        });
+
+        // Handle window resize to ensure correct menu state
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                navLinks.classList.remove('mobile-active', 'open');
+                navOverlay.classList.remove('active');
+            }
+            // Recalculate active section on resize as section offsets might change
+            highlightActiveNavLink();
+        });
+    </script>
+</body>
+</html>
